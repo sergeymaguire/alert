@@ -24,27 +24,7 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.post('/', (req, res) => {
-  const { number, text } = req.body;
-
-  nexmo.message.sendSms(
-    '17542276158', number, text, { type: 'unicode' },
-    (err, responseData) => {
-      if(err) {
-        console.log(err);
-      } else {
-        const { messages } = responseData;
-        const { ['message-id']: id, ['to']: number, ['error-text']: error  } = messages[0];
-        const data = {
-          id,
-          number,
-          error
-        };
-        io.emit('smsStatus', data);
-      }
-    }
-  );
-});
+sendSMS();
 
 const port = 3000;
 
@@ -58,3 +38,24 @@ io.on('connection', (socket) => {
     console.log('Disconnected');
   })
 });
+function sendSMS() {
+  app.post('/', (req, res) => {
+    const { number, text } = req.body;
+    nexmo.message.sendSms('17542276158', number, text, { type: 'unicode' }, (err, responseData) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        const { messages } = responseData;
+        const { ['message-id']: id, ['to']: number, ['error-text']: error } = messages[0];
+        const data = {
+          id,
+          number,
+          error
+        };
+        io.emit('smsStatus', data);
+      }
+    });
+  });
+}
+

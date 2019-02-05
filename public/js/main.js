@@ -16,6 +16,7 @@ function send() {
 
 const socket = io();
 
+
 const getTimeSchedule = getTime();
 
 const fetchServer = ({ number, text }) => {
