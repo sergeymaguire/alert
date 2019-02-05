@@ -6,22 +6,17 @@ const numberInput = document.getElementById('number'),
 
 button.addEventListener('click', send, false);
 
-const socket = io();
-socket.on('smsStatus', function(data){
-  if(data.error){
-    response.innerHTML = '<h5>Text message sent to ' + data.error + '</h5>';
-  }else{
-    response.innerHTML = '<h5>Text message sent to ' + data.number + '</h5>';
-  }
-});
+function send() {
+  const number = numberInput.value.replace(/\D/g, '');
+  const text = textInput.value;
+  const time = parseInt(scheduleSelect.value, 10);
+  getTimeSchedule({ number, text, time });
+}
 
-let timeOut;
-const getTimeSchedule = ({ time, number, text }) => {
-  if(timeOut) clearTimeout(timeOut);
-  timeOut = setTimeout(() => {
-    fetchServer({ number, text });
-  }, time * 60 * 1000);
-};
+
+const socket = io();
+
+const getTimeSchedule = getTime();
 
 const fetchServer = ({ number, text }) => {
   console.log('send');
@@ -40,10 +35,16 @@ const fetchServer = ({ number, text }) => {
     });
 };
 
-function send() {
-  const number = numberInput.value.replace(/\D/g, '');
-  const text = textInput.value;
-  const time = parseInt(scheduleSelect.value, 10);
-  getTimeSchedule({ number, text, time });
+function getTime() {
+  let timeOut;
+  const getTimeSchedule = ({ time, number, text }) => {
+    if (timeOut)
+      clearTimeout(timeOut);
+    timeOut = setTimeout(() => {
+      fetchServer({ number, text });
+    }, time * 60 * 1000);
+  };
+  return getTimeSchedule;
 }
+
 
