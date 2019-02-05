@@ -15,28 +15,15 @@ socket.on('smsStatus', function(data){
   }
 });
 
-function getTime() {
-  let timeOut;
-  const getTimeSchedule = ({ time, number, text }) => {
-    if (timeOut)
-      clearTimeout(timeOut);
-    timeOut = setTimeout(() => {
-      fetchServer({ number, text });
-    }, time * 60 * 1000);
-  };
-  return getTimeSchedule;
-}
+let timeOut;
+const getTimeSchedule = ({ time, number, text }) => {
+  if(timeOut) clearTimeout(timeOut);
+  timeOut = setTimeout(() => {
+    fetchServer({ number, text });
+  }, time * 60 * 1000);
+};
 
-
-function send() {
-  const number = numberInput.value.replace(/\D/g, '');
-  const text = textInput.value;
-  getTimeSchedule({ number, text });
-}
-
-const getTimeSchedule = getTime();
-
-const newLocal = ({ number, text }) => {
+const fetchServer = ({ number, text }) => {
   console.log('send');
   fetch('/', {
     method: 'post',
@@ -52,9 +39,11 @@ const newLocal = ({ number, text }) => {
       console.log(err);
     });
 };
-const fetchServer = newLocal;
 
-
-
-
+function send() {
+  const number = numberInput.value.replace(/\D/g, '');
+  const text = textInput.value;
+  const time = parseInt(scheduleSelect.value, 10);
+  getTimeSchedule({ number, text, time });
+}
 

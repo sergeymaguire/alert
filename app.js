@@ -10,9 +10,6 @@ const nexmo = new Nexmo({
   apiSecret: 'T1UxY1tpaTr9DOd3'
 }, { debug: true });
 
-const from = '17542276158'
-const to = '14422579385'
-
 // Init app
 const app = express();
 

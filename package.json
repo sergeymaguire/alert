@@ -1,12 +1,12 @@
 {
   "name": "alert",
   "version": "1.0.0",
-  "description": "send out alert of animal",
+  "description": "send out an alert to found animal",
   "main": "app.js",
   "scripts": {
     "start": "node app"
   },
-  "author": "James Maguire",
+  "author": "Sergey Maguire",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.2",
