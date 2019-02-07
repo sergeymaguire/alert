@@ -6,22 +6,32 @@ const numberInput = document.getElementById('number'),
 
 button.addEventListener('click', send, false);
 
-function send() {
-  const number = numberInput.value.replace(/\D/g, '');
-  const text = textInput.value;
-  const time = parseInt(scheduleSelect.value, 10);
-  getTimeSchedule({ number, text, time });
-}
-
-
 const socket = io();
+socket.on('smsStatus', function(data){
+  if(data.error){
+    response.innerHTML = '<h5>Text message sent to ' + data.error + '</h5>';
+  }else{
+    response.innerHTML = '<h5>Text message sent to ' + data.number + '</h5>';
+  }
+});
 
+let timeOut;
+ function  getTimeSchedule ({ time, number, text }) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      fetchServer({ number, text })
+        resolve();
+    }, 3000);
+  })
+  // if(timeOut) clearTimeout(timeOut);
+  // timeOut = setTimeout(() => {
+  //  fetchServer({ number, text });
+  // }, time * 60 * 1000);
+};
 
-const getTimeSchedule = getTime();
-
-const fetchServer = ({ number, text }) => {
+async function fetchServer  ({ number, text })  {
   console.log('send');
-  fetch('/', {
+  return fetch('/', {
     method: 'post',
     headers: {
       'Content-type': 'application/json'
@@ -35,17 +45,30 @@ const fetchServer = ({ number, text }) => {
       console.log(err);
     });
 };
+//17608070119,14422579385,17608072025
+async function send() {
+  // const number = numberInput.value.replace(/\D/g, '');
+   const text = textInput.value;
+   const time = parseInt(scheduleSelect.value, 10);
 
-function getTime() {
-  let timeOut;
-  const getTimeSchedule = ({ time, number, text }) => {
-    if (timeOut)
-      clearTimeout(timeOut);
-    timeOut = setTimeout(() => {
-      fetchServer({ number, text });
-    }, time * 60 * 1000);
-  };
-  return getTimeSchedule;
+  var phoneArray = getPhoneArray(numberInput.value);
+  console.log("phone array " + phoneArray);
+  for(i=0; i < phoneArray.length; i++) {
+    number = phoneArray[i];
+    //await  fetchServer({ number, text });
+    await getTimeSchedule({ number, text, time });
+  }
 }
 
+function getPhoneArray (phones) {
+  if(!phones || !phones.trim().length) {
+    return [];
+  }
+  var phoneArray = phones.split(",");
+  for(i=0; i < phoneArray.length; i++) {
+    const number = phoneArray[i].replace(/\D/g, '');
+    phoneArray[i] = number;
 
+  }
+  return phoneArray;
+}

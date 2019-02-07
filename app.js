@@ -4,33 +4,67 @@ const ejs = require('ejs');
 const Nexmo = require('nexmo');
 const socketio = require('socket.io');
 
+// Init Nexmo
 const nexmo = new Nexmo({
-  apiKey: '9e23ad2a',
-  apiSecret: 'T1UxY1tpaTr9DOd3'
+  apiKey: 'aed66d15',
+  apiSecret: 'nTPHRJAb1SGsOc6k'
 }, { debug: true });
 
-
+// Init app
 const app = express();
 
+// Template engine setup
 app.set('view engine', 'html');
 app.engine('html', ejs.renderFile);
 
+// Public folder setup
 app.use(express.static(__dirname + '/public'));
 
+// Body parser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Index route
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-sendSMS();
+// Catch form submit
+app.post('/', (req, res) => {
+  // res.send(req.body);
+  // console.log(req.body);
+  const { number, text } = req.body;
 
-const port = process.env.PORT || 3000;
+  nexmo.message.sendSms(
+    '13056023940', number, text, { type: 'unicode' },
+    (err, responseData) => {
+      if(err) {
+        console.log(err);
+      } else {
+        const { messages } = responseData;
+        const { ['message-id']: id, ['to']: number, ['error-text']: error  } = messages[0];
+        console.dir(responseData);
+        // Get data from response
+        const data = {
+          id,
+          number,
+          error
+        };
 
-const server = app.listen(port, () => console.log(`Listening on ${port}`));
+        // Emit to the client
+        io.emit('smsStatus', data);
+      }
+    }
+  );
+});
 
+// Define port
+const port = 3000;
 
+// Start server
+const server = app.listen(port, () => console.log(`Server started on port ${port}`));
+
+// Connect to socket.io
 const io = socketio(server);
 io.on('connection', (socket) => {
   console.log('Connected');
@@ -38,24 +72,3 @@ io.on('connection', (socket) => {
     console.log('Disconnected');
   })
 });
-function sendSMS() {
-  app.post('/', (req, res) => {
-    const { number, text } = req.body;
-    nexmo.message.sendSms('17542276158', number, text, { type: 'unicode' }, (err, responseData) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        const { messages } = responseData;
-        const { ['message-id']: id, ['to']: number, ['error-text']: error } = messages[0];
-        const data = {
-          id,
-          number,
-          error
-        };
-        io.emit('smsStatus', data);
-      }
-    });
-  });
-}
-
